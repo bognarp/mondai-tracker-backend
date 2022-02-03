@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const usersRouter = require('./routes/api/users');
 const projectsRouter = require('./routes/api/projects');
 const mongoose = require('mongoose');
+const passport = require('passport');
 
 mongoose
   .connect(config.MONGODB_URI, { useNewUrlParser: true })
@@ -15,6 +16,9 @@ mongoose
 const app = express();
 
 app.disable('x-powered-by');
+
+app.use(passport.initialize());
+require('./utils/passport')(passport);
 
 app.use(cors());
 app.use(bodyParser.json());

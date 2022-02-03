@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const validateLoginInput = require('../../validation/login');
 const validateSignupInput = require('../../validation/signup');
 const { SECRET } = require('../../utils/config');
+const passport = require('passport');
 const router = express.Router();
 
 // /api/users
@@ -83,5 +84,15 @@ router.post('/login', (req, res) => {
     });
   });
 });
+
+// Protected routes
+
+router.get(
+  '/current',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.json(req.user);
+  }
+);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const ProjectSchema = new Schema(
+const projectSchema = new Schema(
   {
     title: {
       type: String,
@@ -13,6 +13,10 @@ const ProjectSchema = new Schema(
   { timestamps: true }
 );
 
-const Project = model('Project', ProjectSchema);
+projectSchema.statics.deleteById = function (_id) {
+  return this.deleteOne({ _id });
+};
+
+const Project = model('Project', projectSchema);
 
 module.exports = Project;

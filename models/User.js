@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const UserSchema = new Schema(
+const userSchema = new Schema(
   {
     username: {
       type: String,
@@ -23,13 +23,17 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-UserSchema.set('toJSON', {
+userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     // the passwordHash should not be revealed
     delete returnedObject.password;
   },
 });
 
-const User = model('User', UserSchema);
+userSchema.methods.isProjectOwner = function (project) {
+  return this.ownProjects.some((pId) => project.equals(pId));
+};
+
+const User = model('User', userSchema);
 
 module.exports = User;

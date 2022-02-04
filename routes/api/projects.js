@@ -45,19 +45,23 @@ router.delete(
   (req, res, next) => {
     const user = req.user;
 
-    Project.findOneAndDelete({
-      _id: req.params.projectId,
-      owners: user.id,
-    })
+    Project.findById(req.params.projectId)
       .then((project) => {
         if (!project) {
-          res.status(404).end();
+          return res.status(404).end();
         }
 
-        user.ownProjects.pull(project._id);
-        user.save();
+        if (!user.isProjectOwner(project)) {
+          return res.status(403).end();
+        }
 
-        res.status(204).end();
+        Project.deleteById(project._id).then((wat) => {
+          console.log('wat is wat', wat);
+
+          user.ownProjects.pull(project._id);
+          user.save();
+          res.status(204).end();
+        });
       })
       .catch((err) => next(err));
   }

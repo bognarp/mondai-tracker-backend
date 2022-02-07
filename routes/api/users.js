@@ -88,7 +88,7 @@ router.post('/login', (req, res, next) => {
             SECRET,
             { expiresIn: 3600 },
             (err, encodedToken) => {
-              res.json({ success: true, token: `Bearer ${encodedToken}` });
+              res.json({ success: true, token: `${encodedToken}` });
             }
           );
         } else {

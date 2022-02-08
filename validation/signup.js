@@ -11,8 +11,8 @@ const validateSignupInput = (data) => {
   password = validText(password) ? password : '';
   password2 = validText(password2) ? password2 : '';
 
-  if (!Validator.isLength(username, { min: 4, max: 15 })) {
-    errors.username = 'Username must be between 4 and 15 characters long';
+  if (!Validator.isLength(username, { min: 4, max: 30 })) {
+    errors.username = 'Username must be between 4 and 30 characters long';
   }
 
   if (Validator.isEmpty(email)) {

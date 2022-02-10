@@ -10,9 +10,15 @@ options.secretOrKey = SECRET;
 module.exports = (passport) => {
   passport.use(
     new JwtStrategy(options, (jwt_payload, done) => {
+      // FIXME: This creates way more queries than needed:
+      // Every protected req-res cycle has to query Users and
+      // then Projects.
       User.findById(jwt_payload.id)
+        .populate('ownProjects', { title: 1 })
+        .populate('memberProjects', { title: 1 })
         .then((user) => {
           if (user) {
+            console.log('passport query callback...');
             return done(null, user);
           }
 

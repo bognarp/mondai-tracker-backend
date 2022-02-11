@@ -1,8 +1,10 @@
 const validText = require('./valid-text');
 const Validator = require('validator');
 
-const validateSignupInput = (data) => {
+const checkSignup = (data) => {
   let errors = {};
+
+  console.log('DATA:', data);
 
   let { username, email, password, password2 } = data;
 
@@ -45,4 +47,4 @@ const validateSignupInput = (data) => {
   };
 };
 
-module.exports = validateSignupInput;
+module.exports = checkSignup;

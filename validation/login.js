@@ -1,7 +1,7 @@
 const validText = require('./valid-text');
 const Validator = require('validator');
 
-const validateLoginInput = (data) => {
+const checkLogin = (data) => {
   let errors = {};
 
   let { email, password } = data;
@@ -27,4 +27,4 @@ const validateLoginInput = (data) => {
   };
 };
 
-module.exports = validateLoginInput;
+module.exports = checkLogin;

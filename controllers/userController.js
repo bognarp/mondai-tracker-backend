@@ -1,16 +1,12 @@
 const bcrypt = require('bcryptjs');
-const express = require('express');
-const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
-const validateLoginInput = require('../../validation/login');
-const validateSignupInput = require('../../validation/signup');
-const { SECRET } = require('../../utils/config');
-const passport = require('passport');
-const router = express.Router();
 
-// /api/users
+const User = require('../models/User');
+const { SECRET } = require('../utils/config');
+const checkLogin = require('../validation/login');
+const checkSignup = require('../validation/signup');
 
-router.get('/', (req, res, next) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.json(users);
@@ -18,29 +14,21 @@ router.get('/', (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-});
+};
 
-router.post('/signup', (req, res, next) => {
-  const { errors, isValid } = validateSignupInput(req.body);
-
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-
+const signupUser = (req, res, next) => {
   const { username, email, password } = req.body;
 
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        errors.email = 'Email already exists';
-        return res.status(400).json(errors);
+        return res.status(400).json({ email: 'Email already exists' });
       }
 
       User.findOne({ username })
         .then((user) => {
           if (user) {
-            errors.username = 'Username already taken';
-            return res.status(400).json(errors);
+            return res.status(400).json({ username: 'Username already taken' });
           }
           const newUser = new User({
             username,
@@ -62,21 +50,15 @@ router.post('/signup', (req, res, next) => {
         .catch((err) => next(err));
     })
     .catch((err) => next(err));
-});
+};
 
-router.post('/login', (req, res, next) => {
-  const { errors, isValid } = validateLoginInput(req.body);
-
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-
+const loginUser = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
     .then((user) => {
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ user: 'User not found' });
       }
 
       bcrypt.compare(password, user.password).then((isMatch) => {
@@ -92,22 +74,44 @@ router.post('/login', (req, res, next) => {
             }
           );
         } else {
-          errors.password = 'Incorrect password';
-          return res.status(400).json(errors);
+          return res.status(400).json({ password: 'Incorrect password' });
         }
       });
     })
     .catch((err) => next(err));
-});
+};
 
-// Protected routes
+const getCurrentUser = (req, res) => {
+  res.json(req.user);
+};
 
-router.get(
-  '/current',
-  passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    res.json(req.user);
+// Validations
+
+const validateSignup = (req, res, next) => {
+  const { errors, isValid } = checkSignup(req.body);
+
+  if (!isValid) {
+    return res.status(400).json(errors);
   }
-);
 
-module.exports = router;
+  next();
+};
+
+const validateLogin = (req, res, next) => {
+  const { errors, isValid } = checkLogin(req.body);
+
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
+  next();
+};
+
+module.exports = {
+  getUsers,
+  signupUser,
+  loginUser,
+  getCurrentUser,
+  validateSignup,
+  validateLogin,
+};

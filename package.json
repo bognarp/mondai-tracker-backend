@@ -4,9 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "server": "nodemon app.js",
-    "server:debug": "nodemon --inspect app.js"
+    "start:dev": "NODE_ENV=development nodemon app.js",
+    "server:debug": "NODE_ENV=development nodemon --inspect app.js",
+    "start:production": "NODE_ENV=production node app.js"
   },
   "author": "",
   "license": "ISC",

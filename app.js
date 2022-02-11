@@ -1,13 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const config = require('./utils/config');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const passport = require('passport');
+
+const config = require('./utils/config');
 const passportConfig = require('./utils/passport');
-const usersRouter = require('./routes/api/users');
-const projectsRouter = require('./routes/api/projects');
+const usersRouter = require('./routes/api/userRoutes');
+const projectsRouter = require('./routes/api/projectRoutes');
 const { errorHandler, unknownEndpoint } = require('./utils/middleware');
 
 mongoose

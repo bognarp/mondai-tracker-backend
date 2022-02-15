@@ -25,13 +25,17 @@ const userSchema = new Schema(
 
 userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    // the passwordHash should not be revealed
     delete returnedObject.password;
+    delete returnedObject.__v;
   },
 });
 
 userSchema.methods.isProjectOwner = function (project) {
   return this.ownProjects.some((pId) => project.equals(pId));
+};
+
+userSchema.methods.isProjectMember = function (project) {
+  return this.memberProjects.some((pId) => project.equals(pId));
 };
 
 const User = model('User', userSchema);

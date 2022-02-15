@@ -3,6 +3,10 @@ const passport = require('passport');
 const router = express.Router();
 
 const userController = require('../../controllers/userController');
+const projectRoutes = require('./projectRoutes');
+const protect = passport.authenticate('jwt', { session: false });
+
+// /api/users
 
 router.route('/').get(userController.getUsers);
 router
@@ -13,7 +17,8 @@ router
   .post(userController.validateLogin, userController.loginUser);
 
 // Protected routes
-router.use(passport.authenticate('jwt', { session: false }));
-router.route('/current').get(userController.getCurrentUser);
+router.route('/current').get(protect, userController.getCurrentUser);
+router.route('/:userId').get(protect, userController.getUserById);
+router.use('/:userId/projects', protect, projectRoutes);
 
 module.exports = router;

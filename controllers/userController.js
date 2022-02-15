@@ -81,24 +81,31 @@ const loginUser = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-const getCurrentUser = (req, res) => {
-  res.json(req.user);
+const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .populate('ownProjects', { title: 1 })
+    .populate('memberProjects', { title: 1 })
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const getUserById = (req, res) => {
+  User.findById(req.params.userId)
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
 
 // Validations
-
-const validateSignup = (req, res, next) => {
-  const { errors, isValid } = checkSignup(req.body);
-
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-
-  next();
-};
-
-const validateLogin = (req, res, next) => {
-  const { errors, isValid } = checkLogin(req.body);
+const _validate = (validator) => (req, res, next) => {
+  const { errors, isValid } = validator(req.body);
 
   if (!isValid) {
     return res.status(400).json(errors);
@@ -106,12 +113,16 @@ const validateLogin = (req, res, next) => {
 
   next();
 };
+
+const validateSignup = _validate(checkSignup);
+const validateLogin = _validate(checkLogin);
 
 module.exports = {
   getUsers,
   signupUser,
   loginUser,
   getCurrentUser,
+  getUserById,
   validateSignup,
   validateLogin,
 };

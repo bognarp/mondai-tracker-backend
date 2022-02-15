@@ -13,6 +13,12 @@ const projectSchema = new Schema(
   { timestamps: true }
 );
 
+projectSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    delete returnedObject.__v;
+  },
+});
+
 projectSchema.statics.deleteById = function (_id) {
   return this.deleteOne({ _id });
 };

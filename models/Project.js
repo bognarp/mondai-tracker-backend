@@ -14,8 +14,8 @@ const projectSchema = new Schema(
 );
 
 projectSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    delete returnedObject.__v;
+  transform: (doc, returnedObj) => {
+    delete returnedObj.__v;
   },
 });
 

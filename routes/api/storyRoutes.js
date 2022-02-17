@@ -3,7 +3,7 @@ const router = express.Router({ mergeParams: true });
 
 const storyController = require('../../controllers/storyController');
 
-// .../stories
+// /:projectId/stories
 
 router
   .route('/current')

@@ -17,7 +17,7 @@ const getAllStories = (req, res, next) => {
   const { projectId } = req.params;
   const filter = _stateFilter(req.path);
 
-  Story.find({ projectId, state: filter })
+  Story.find({ project: projectId, state: filter })
     .then((stories) => {
       res.json(stories);
     })

@@ -35,13 +35,33 @@ const storySchema = new Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true, toObject: { virtuals: true } }
 );
+
+storySchema.set('id', false);
 
 storySchema.set('toJSON', {
   transform: (doc, returnedObj) => {
     delete returnedObj.__v;
   },
+  virtuals: true,
+});
+
+storySchema.virtual('stateCategory').get(function () {
+  switch (this.state) {
+    case 'UNSTARTED':
+    case 'STARTED':
+    case 'REJECTED':
+    case 'FINISHED':
+    case 'RESTARTED':
+      return 'CURRENT';
+    case 'UNSCHEDULED':
+      return 'BACKLOG';
+    case 'ACCEPTED':
+      return 'DONE';
+    default:
+      return null;
+  }
 });
 
 const Story = model('Story', storySchema);

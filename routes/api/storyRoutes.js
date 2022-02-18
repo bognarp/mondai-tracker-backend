@@ -5,6 +5,7 @@ const storyController = require('../../controllers/storyController');
 
 // /:projectId/stories
 
+router.route('/:storyId').patch(storyController.updateStory);
 router
   .route('/current')
   .get(storyController.getAllStories)
@@ -14,6 +15,7 @@ router
   .get(storyController.getAllStories)
   .post(storyController.createStory);
 router.route('/archive').get(storyController.getAllStories);
+router.route('/user/:userId').get(storyController.getCurrentStoriesByUser);
 
 // TODO:
 //    /stories/current .post().get().delete().patch()

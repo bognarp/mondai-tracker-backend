@@ -26,8 +26,23 @@ const getAllStories = (req, res, next) => {
     });
 };
 
+const getCurrentStoriesByUser = (req, res, next) => {
+  const { projectId, userId } = req.params;
+
+  Story.find({ project: projectId, owner: userId })
+    .then((stories) => {
+      res.json(stories);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 const createStory = (req, res, next) => {
   // TODO: validations
+  // title -> required, no duplicates
+  // difficulty ->
+  // priority ->
   const { projectId } = req.params;
   const user = req.user;
   let state;
@@ -53,7 +68,30 @@ const createStory = (req, res, next) => {
     });
 };
 
+const updateStory = (req, res, next) => {
+  const body = req.body;
+
+  Story.findById(req.params.storyId)
+    .then((story) => {
+      if (!story) {
+        return res.status(404).end();
+      }
+      // TODO: validate body
+
+      Object.keys(body).forEach((key) => {
+        story[key] = body[key];
+      });
+
+      story.save().then((updatedStory) => {
+        res.json(updatedStory);
+      });
+    })
+    .catch((e) => next(e));
+};
+
 module.exports = {
   getAllStories,
+  getCurrentStoriesByUser,
   createStory,
+  updateStory,
 };

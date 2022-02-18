@@ -17,8 +17,7 @@ router
   .get(protect, projectController.getProject)
   .delete(protect, projectController.deleteProject);
 router.use('/:projectId/stories', protect, storyRoutes);
-// TODO: route to /:projectId/stories -> stories
-// ------
+
 //       /:projectId/stories/current
 //       /:projectId/stories/backlog
 //       /:projectId/stories/archive

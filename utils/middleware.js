@@ -1,23 +1,61 @@
-const unknownEndpoint = (req, res) => {
-  res.status(404).send({ error: 'unknown endpoint' });
+const AppError = require('./appError');
+
+const validate = (validator) => (req, res, next) => {
+  const { errors, isValid } = validator(req.body);
+
+  if (!isValid) {
+    return res.status(400).json({
+      status: 'fail',
+      message: errors,
+    });
+  }
+
+  next();
 };
 
-const errorHandler = (error, req, res, next) => {
-  console.error('ERROR NAME: ', error.name);
-  console.error('ERROR MESSAGE: ', error.message);
+const unknownEndpoint = (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} endpoint`, 404));
+};
 
-  if (error.name === 'CastError') {
-    return res.status(400).send({ error: 'malformatted id' });
+const _devErrors = (err, res) => {
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+    error: err,
+    stack: err.stack,
+  });
+};
+
+const _prodErrors = (err, res) => {
+  if (err.isOperational) {
+    res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+    });
+  } else {
+    console.error('ERROR  -> ', err);
+
+    res.status(500).json({
+      status: 'error',
+      message: 'Something went wrong!',
+    });
   }
+};
 
-  if (error.name === 'MongooseError') {
-    return res.status(500).send({ error: 'server error' });
+const errorHandler = (err, req, res, next) => {
+  err.status = err.status || 'error';
+  err.statusCode = err.statusCode || 500;
+
+  if (process.env.NODE_ENV === 'development') {
+    _devErrors(err, res);
+  } else if (process.env.NODE_ENV === 'production') {
+    // TODO: handle mongoose errors as 'operational'
+    _prodErrors(err, res);
   }
-
-  next(error);
 };
 
 module.exports = {
   unknownEndpoint,
   errorHandler,
+  validate,
 };

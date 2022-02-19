@@ -1,4 +1,5 @@
 const express = require('express');
+require('express-async-errors');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -30,7 +31,7 @@ passportConfig(passport);
 app.use('/api/users', usersRouter);
 app.use('/api/projects', projectsRouter);
 
-app.use(unknownEndpoint);
+app.all('*', unknownEndpoint);
 app.use(errorHandler);
 
 app.listen(config.PORT, () => {

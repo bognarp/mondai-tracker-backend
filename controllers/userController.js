@@ -1,121 +1,72 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/User');
+const AppError = require('../utils/appError');
 const { SECRET } = require('../utils/config');
-const checkLogin = require('../validation/login');
-const checkSignup = require('../validation/signup');
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => {
-      res.json(users);
-    })
-    .catch((err) => {
-      next(err);
-    });
+const getUsers = async (req, res) => {
+  const users = await User.find({}).exec();
+  res.json(users);
 };
 
-const signupUser = (req, res, next) => {
+const signupUser = async (req, res) => {
   const { username, email, password } = req.body;
 
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        return res.status(400).json({ email: 'Email already exists' });
-      }
+  const userByEmail = await User.findOne({ email }).exec();
+  if (userByEmail) throw new AppError(`Email '${email}' already exists`, 400);
 
-      User.findOne({ username })
-        .then((user) => {
-          if (user) {
-            return res.status(400).json({ username: 'Username already taken' });
-          }
-          const newUser = new User({
-            username,
-            email,
-            password,
-          });
+  const userByUsername = await User.findOne({ username }).exec();
+  if (userByUsername)
+    throw new AppError(`Username '${username}' already taken`, 400);
 
-          bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-              if (err) throw err;
-              newUser.password = hash;
-              newUser
-                .save()
-                .then((user) => res.json(user))
-                .catch((err) => console.log(err));
-            });
-          });
-        })
-        .catch((err) => next(err));
-    })
-    .catch((err) => next(err));
+  const newUser = new User({
+    username,
+    email,
+    password,
+  });
+
+  const salt = bcrypt.genSalt(10);
+  const hashedPw = bcrypt.hash(newUser.password, salt);
+
+  newUser.password = hashedPw;
+
+  await newUser.save();
+
+  res.json(newUser);
 };
 
-const loginUser = (req, res, next) => {
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).json({ user: 'User not found' });
-      }
+  const user = await User.findOne({ email }).exec();
+  if (!user) throw new AppError(`User with email '${email}' not found`, 400);
 
-      bcrypt.compare(password, user.password).then((isMatch) => {
-        if (isMatch) {
-          const payload = { id: user.id, username: user.username };
+  const match = await bcrypt.compare(password, user.password);
 
-          jwt.sign(
-            payload,
-            SECRET,
-            { expiresIn: 3600 },
-            (err, encodedToken) => {
-              res.json({ success: true, token: `${encodedToken}` });
-            }
-          );
-        } else {
-          return res.status(400).json({ password: 'Incorrect password' });
-        }
-      });
-    })
-    .catch((err) => next(err));
+  if (match) {
+    const payload = { id: user.id, username: user.username };
+
+    jwt.sign(payload, SECRET, { expiresIn: '1h' }, (err, encodedToken) => {
+      res.json({ success: true, token: `${encodedToken}` });
+    });
+  } else {
+    throw new AppError('Incorrect password', 400);
+  }
 };
 
-const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
+const getCurrentUser = async (req, res) => {
+  const user = await User.findById(req.user._id)
     .populate('ownProjects', { title: 1 })
     .populate('memberProjects', { title: 1 })
-    .then((user) => {
-      res.json(user);
-    })
-    .catch((err) => {
-      next(err);
-    });
+    .exec();
+
+  res.json(user);
 };
 
-const getUserById = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      res.json(user);
-    })
-    .catch((err) => {
-      next(err);
-    });
+const getUserById = async (req, res) => {
+  const user = await User.findById(req.params.userId).exec();
+  res.json(user);
 };
-
-// Validations
-const _validate = (validator) => (req, res, next) => {
-  const { errors, isValid } = validator(req.body);
-
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-
-  next();
-};
-
-const validateSignup = _validate(checkSignup);
-const validateLogin = _validate(checkLogin);
 
 module.exports = {
   getUsers,
@@ -123,6 +74,4 @@ module.exports = {
   loginUser,
   getCurrentUser,
   getUserById,
-  validateSignup,
-  validateLogin,
 };

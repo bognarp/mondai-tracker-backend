@@ -1,4 +1,5 @@
 const Story = require('../models/Story');
+const AppError = require('../utils/appError');
 
 const _stateFilter = (path) => {
   switch (path) {
@@ -13,32 +14,32 @@ const _stateFilter = (path) => {
   }
 };
 
-const getAllStories = (req, res, next) => {
+const getAllStories = async (req, res) => {
+  // TODO: getting current/archive/backlog should be possible
+  // only when user is (projectOwner || projectMember)
   const { projectId } = req.params;
   const filter = _stateFilter(req.path);
 
-  Story.find({ project: projectId, state: filter })
-    .then((stories) => {
-      res.json(stories);
-    })
-    .catch((err) => {
-      next(err);
-    });
+  const stories = await Story.find({
+    project: projectId,
+    state: filter,
+  }).exec();
+
+  res.json(stories);
 };
 
-const getCurrentStoriesByUser = (req, res, next) => {
+const getCurrentStoriesByUser = async (req, res) => {
   const { projectId, userId } = req.params;
 
-  Story.find({ project: projectId, owner: userId })
-    .then((stories) => {
-      res.json(stories);
-    })
-    .catch((err) => {
-      next(err);
-    });
+  const stories = await Story.find({
+    project: projectId,
+    owner: userId,
+  }).exec();
+
+  res.json(stories);
 };
 
-const createStory = (req, res, next) => {
+const createStory = async (req, res) => {
   // TODO: validations
   // title -> required, no duplicates
   // difficulty ->
@@ -50,7 +51,7 @@ const createStory = (req, res, next) => {
   if (req.path === '/current') state = 'UNSTARTED';
   if (req.path === '/backlog') state = 'UNSCHEDULED';
 
-  const newStory = new Story({
+  const story = new Story({
     title: req.body.title,
     description: req.body.description,
     state,
@@ -58,35 +59,30 @@ const createStory = (req, res, next) => {
     project: projectId,
   });
 
-  newStory
-    .save()
-    .then((story) => {
-      res.status(201).json(story);
-    })
-    .catch((err) => {
-      next(err);
-    });
+  const savedStory = await story.save();
+
+  res.status(201).json(savedStory);
 };
 
-const updateStory = (req, res, next) => {
+const updateStory = async (req, res) => {
+  const { projectId, storyId } = req.params;
+  const user = req.user;
   const body = req.body;
 
-  Story.findById(req.params.storyId)
-    .then((story) => {
-      if (!story) {
-        return res.status(404).end();
-      }
-      // TODO: validate body
+  const story = await Story.findById(storyId).exec();
+  
+  if (!story) throw new AppError('Story not found', 404);
+  if (!user.isProjectOwner(projectId) || !story.owner.equals(user._id)) {
+    throw new AppError('Forbidden', 403);
+  }
 
-      Object.keys(body).forEach((key) => {
-        story[key] = body[key];
-      });
+  Object.keys(body).forEach((key) => {
+    story[key] = body[key];
+  });
 
-      story.save().then((updatedStory) => {
-        res.json(updatedStory);
-      });
-    })
-    .catch((e) => next(e));
+  const updatedStory = await story.save();
+
+  res.json(updatedStory);
 };
 
 module.exports = {

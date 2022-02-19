@@ -1,37 +1,32 @@
 const Project = require('../models/Project');
+const AppError = require('../utils/appError');
 
-const getAllProjects = (req, res, next) => {
+const getAllProjects = async (req, res) => {
   const { userId } = req.params;
   const filter = userId
     ? { $or: [{ owners: [userId] }, { members: [userId] }] }
     : {};
 
-  Project.find(filter)
-    .then((projects) => {
-      res.json(projects);
-    })
-    .catch((err) => {
-      next(err);
-    });
+  const projects = await Project.find(filter);
+
+  res.json(projects);
 };
 
-const getProject = (req, res, next) => {
+const getProject = async (req, res) => {
   const user = req.user;
 
-  Project.findById(req.params.projectId)
-    .then((project) => {
-      if (!project) return res.status(404).end();
+  const project = await Project.findById(req.params.projectId).exec();
 
-      if (!user.isProjectOwner(project) && !user.isProjectMember(project)) {
-        return res.status(403).end();
-      }
+  if (!project) throw new AppError('Project not found', 404);
 
-      res.json(project);
-    })
-    .catch((err) => next(err));
+  if (!user.isProjectOwner(project._id) && !user.isProjectMember(project._id)) {
+    throw new AppError('Forbidden', 403);
+  }
+
+  res.json(project);
 };
 
-const createProject = (req, res, next) => {
+const createProject = async (req, res) => {
   // TODO: validations
   const user = req.user;
 
@@ -40,38 +35,27 @@ const createProject = (req, res, next) => {
     owners: [user._id],
   });
 
-  newProject
-    .save()
-    .then((project) => {
-      user.ownProjects = user.ownProjects.concat(project._id);
-      user.save();
-      res.json(project);
-    })
-    .catch((err) => next(err));
+  const savedProject = await newProject.save();
+  user.ownProjects = user.ownProjects.concat(savedProject._id);
+
+  await user.save();
+
+  res.json(savedProject);
 };
 
-const deleteProject = (req, res, next) => {
+const deleteProject = async (req, res) => {
   const user = req.user;
 
-  Project.findById(req.params.projectId)
-    .then((project) => {
-      if (!project) {
-        return res.status(404).end();
-      }
+  const project = await Project.findById(req.params.projectId);
+  if (!project) throw new AppError('Project not found', 404);
+  if (!user.isProjectOwner(project._id)) throw new AppError('Forbidden', 403);
 
-      if (!user.isProjectOwner(project)) {
-        return res.status(403).end();
-      }
+  await Project.deleteById(project._id);
 
-      Project.deleteById(project._id).then((wat) => {
-        console.log('wat is wat', wat);
+  user.ownProjects.pull(project._id);
+  await user.save();
 
-        user.ownProjects.pull(project._id);
-        user.save();
-        res.status(204).end();
-      });
-    })
-    .catch((err) => next(err));
+  res.status(204).end();
 };
 
 module.exports = {

@@ -12,10 +12,18 @@ const usersRouter = require('./routes/api/userRoutes');
 const projectsRouter = require('./routes/api/projectRoutes');
 const { errorHandler, unknownEndpoint } = require('./utils/middleware');
 
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION!');
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
 mongoose
   .connect(config.MONGODB_URI, { useNewUrlParser: true })
-  .then(() => console.log('Connected to MongoDB succesfully'))
-  .catch((err) => console.log(err));
+  .then(() => console.log('Connected to MongoDB...'))
+  .catch((err) => {
+    console.error(err.name, err.message);
+  });
 
 const app = express();
 
@@ -34,6 +42,14 @@ app.use('/api/projects', projectsRouter);
 app.all('*', unknownEndpoint);
 app.use(errorHandler);
 
-app.listen(config.PORT, () => {
+const server = app.listen(config.PORT, () => {
   console.log(`Server is running on port ${config.PORT}`);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION!');
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
 });

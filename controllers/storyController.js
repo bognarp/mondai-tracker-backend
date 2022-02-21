@@ -72,7 +72,7 @@ const updateStory = async (req, res) => {
   const story = await Story.findById(storyId).exec();
   
   if (!story) throw new AppError('Story not found', 404);
-  if (!user.isProjectOwner(projectId) || !story.owner.equals(user._id)) {
+  if (!user.isProjectOwner(projectId) && !user.isProjectMember(projectId)) {
     throw new AppError('Forbidden', 403);
   }
 

@@ -4,8 +4,6 @@ const Validator = require('validator');
 const checkSignup = (data) => {
   let errors = {};
 
-  console.log('DATA:', data);
-
   let { username, email, password, password2 } = data;
 
   username = validText(username) ? username : '';
@@ -15,6 +13,10 @@ const checkSignup = (data) => {
 
   if (!Validator.isLength(username, { min: 4, max: 30 })) {
     errors.username = 'Username must be between 4 and 30 characters long';
+  }
+
+  if (Validator.isEmpty(username)) {
+    errors.username = 'Username field is required';
   }
 
   if (Validator.isEmpty(email)) {

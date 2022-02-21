@@ -13,11 +13,14 @@ const signupUser = async (req, res) => {
   const { username, email, password } = req.body;
 
   const userByEmail = await User.findOne({ email }).exec();
-  if (userByEmail) throw new AppError(`Email '${email}' already exists`, 400);
+  if (userByEmail) {
+    throw new AppError(`Email '${email}' already exists`, 400);
+  }
 
   const userByUsername = await User.findOne({ username }).exec();
-  if (userByUsername)
+  if (userByUsername) {
     throw new AppError(`Username '${username}' already taken`, 400);
+  }
 
   const newUser = new User({
     username,
@@ -39,7 +42,9 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }).exec();
-  if (!user) throw new AppError(`User with email '${email}' not found`, 400);
+  if (!user) {
+    throw new AppError(`User with email '${email}' not found`, 400);
+  }
 
   const match = await bcrypt.compare(password, user.password);
 

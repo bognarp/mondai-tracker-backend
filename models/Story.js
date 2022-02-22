@@ -5,6 +5,7 @@ const storySchema = new Schema(
     title: {
       type: String,
       required: true,
+      // TODO: must be between 5 - 30 chars
     },
     description: String,
     state: {
@@ -19,6 +20,16 @@ const storySchema = new Schema(
         'ACCEPTED',
       ],
       required: true,
+    },
+    difficulty: {
+      type: Number,
+      min: [0, "Difficulty can't be negative"],
+      max: [4, "Difficulty can't be more than 4"],
+    },
+    priority: {
+      type: Number,
+      min: [0, "Priority can't be negative"],
+      max: [4, "Priority can't be more than 4"],
     },
     owner: {
       type: Schema.Types.ObjectId,

@@ -4,13 +4,13 @@ const userSchema = new Schema(
   {
     username: {
       type: String,
-      index: true,
       required: true,
+      unique: true,
     },
     email: {
       type: String,
-      index: true,
       required: true,
+      unique: true,
     },
     password: {
       type: String,
@@ -30,12 +30,12 @@ userSchema.set('toJSON', {
   },
 });
 
-userSchema.methods.isProjectOwner = function (project) {
-  return this.ownProjects.some((pId) => project.equals(pId));
+userSchema.methods.isProjectOwner = function (projectId) {
+  return this.ownProjects.some((pId) => pId.equals(projectId));
 };
 
-userSchema.methods.isProjectMember = function (project) {
-  return this.memberProjects.some((pId) => project.equals(pId));
+userSchema.methods.isProjectMember = function (projectId) {
+  return this.memberProjects.some((pId) => pId.equals(projectId));
 };
 
 const User = model('User', userSchema);

@@ -25,11 +25,13 @@ const storySchema = new Schema(
       type: Number,
       min: [0, "Difficulty can't be negative"],
       max: [4, "Difficulty can't be more than 4"],
+      default: 0,
     },
     priority: {
       type: Number,
       min: [0, "Priority can't be negative"],
       max: [4, "Priority can't be more than 4"],
+      default: 0,
     },
     owner: {
       type: Schema.Types.ObjectId,

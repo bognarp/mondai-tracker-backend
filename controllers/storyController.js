@@ -23,7 +23,10 @@ const getAllStories = async (req, res) => {
   const stories = await Story.find({
     project: projectId,
     state: filter,
-  }).exec();
+  })
+    .populate({ path: 'requester', select: 'username' })
+    .populate({ path: 'owner', select: 'username' })
+    .exec();
 
   res.json(stories);
 };
@@ -70,7 +73,7 @@ const updateStory = async (req, res) => {
   const body = req.body;
 
   const story = await Story.findById(storyId).exec();
-  
+
   if (!story) throw new AppError('Story not found', 404);
   if (!user.isProjectOwner(projectId) && !user.isProjectMember(projectId)) {
     throw new AppError('Forbidden', 403);

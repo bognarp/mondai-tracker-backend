@@ -7,7 +7,10 @@ const getAllProjects = async (req, res) => {
     ? { $or: [{ owners: [userId] }, { members: [userId] }] }
     : {};
 
-  const projects = await Project.find(filter);
+  const projects = await Project.find(filter)
+    .populate({ path: 'owners', select: 'username' })
+    .populate({ path: 'members', select: 'username' })
+    .exec();
 
   res.json(projects);
 };
@@ -15,7 +18,10 @@ const getAllProjects = async (req, res) => {
 const getProject = async (req, res) => {
   const user = req.user;
 
-  const project = await Project.findById(req.params.projectId).exec();
+  const project = await Project.findById(req.params.projectId)
+    .populate({ path: 'owners', select: 'username' })
+    .populate({ path: 'members', select: 'username' })
+    .exec();
 
   if (!project) throw new AppError('Project not found', 404);
 

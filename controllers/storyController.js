@@ -37,7 +37,10 @@ const getCurrentStoriesByUser = async (req, res) => {
   const stories = await Story.find({
     project: projectId,
     owner: userId,
-  }).exec();
+  })
+    .populate({ path: 'requester', select: 'username' })
+    .populate({ path: 'owner', select: 'username' })
+    .exec();
 
   res.json(stories);
 };

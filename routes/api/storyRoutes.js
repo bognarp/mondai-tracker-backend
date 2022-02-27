@@ -4,7 +4,7 @@ const router = express.Router({ mergeParams: true });
 const storyController = require('../../controllers/storyController');
 
 // /:projectId/stories
-
+router.route('/').get(storyController.getStoriesQuery);
 router.route('/:storyId').patch(storyController.updateStory);
 router
   .route('/current')

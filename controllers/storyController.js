@@ -14,6 +14,34 @@ const _stateFilter = (path) => {
   }
 };
 
+const getStoriesQuery = async (req, res) => {
+  const customQueryParams = ['state', 'sort'];
+  const queryObj = { ...req.query };
+
+  customQueryParams.forEach((param) => {
+    delete queryObj[param];
+  });
+
+  let query = Story.find(queryObj);
+
+  if (req.query.state) {
+    const states = req.query.state.split(',');
+    query = query.where('state').in(states);
+  }
+
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ');
+    query = query.sort(sortBy);
+  }
+
+  const stories = await query
+    .populate({ path: 'requester', select: 'username' })
+    .populate({ path: 'owner', select: 'username' })
+    .exec();
+
+  res.json(stories);
+};
+
 const getAllStories = async (req, res) => {
   // TODO: getting current/archive/backlog should be possible
   // only when user is (projectOwner || projectMember)
@@ -92,6 +120,7 @@ const updateStory = async (req, res) => {
 };
 
 module.exports = {
+  getStoriesQuery,
   getAllStories,
   getCurrentStoriesByUser,
   createStory,

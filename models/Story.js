@@ -20,6 +20,7 @@ const storySchema = new Schema(
         'ACCEPTED',
       ],
       required: true,
+      default: 'UNSCHEDULED',
     },
     difficulty: {
       type: Number,
@@ -76,6 +77,10 @@ storySchema.virtual('stateCategory').get(function () {
       return null;
   }
 });
+
+storySchema.statics.deleteById = function (_id) {
+  return this.deleteOne({ _id });
+};
 
 const Story = model('Story', storySchema);
 

@@ -1,22 +1,30 @@
 const Story = require('../models/Story');
 const AppError = require('../utils/appError');
 
-const _stateFilter = (path) => {
-  switch (path) {
-    case '/current':
-      return ['UNSTARTED', 'STARTED', 'RESTARTED', 'FINISHED', 'REJECTED'];
-    case '/backlog':
-      return ['UNSCHEDULED'];
-    case '/archive':
-      return ['ACCEPTED'];
-    default:
-      break;
-  }
+// ALIAS MIDDLEWARE
+const currentAlias = (req, res, next) => {
+  req.query.state = 'UNSTARTED,STARTED,RESTARTED,FINISHED,REJECTED';
+  next();
 };
 
-const getStoriesQuery = async (req, res) => {
+const backlogAlias = (req, res, next) => {
+  req.query.state = 'UNSCHEDULED';
+  next();
+};
+
+const archiveAlias = (req, res, next) => {
+  req.query.state = 'ACCEPTED';
+  next();
+};
+
+// CRUD
+const getStories = async (req, res) => {
+  const { projectId } = req.params;
   const customQueryParams = ['state', 'sort'];
-  const queryObj = { ...req.query };
+  const queryObj = { ...req.query, project: projectId };
+
+  // FIXME: getting current/archive/backlog should be possible
+  // only when user is (projectOwner || projectMember)
 
   customQueryParams.forEach((param) => {
     delete queryObj[param];
@@ -32,6 +40,8 @@ const getStoriesQuery = async (req, res) => {
   if (req.query.sort) {
     const sortBy = req.query.sort.split(',').join(' ');
     query = query.sort(sortBy);
+  } else {
+    query = query.sort('-priority -difficulty');
   }
 
   const stories = await query
@@ -42,60 +52,33 @@ const getStoriesQuery = async (req, res) => {
   res.json(stories);
 };
 
-const getAllStories = async (req, res) => {
-  // TODO: getting current/archive/backlog should be possible
-  // only when user is (projectOwner || projectMember)
-  const { projectId } = req.params;
-  const filter = _stateFilter(req.path);
-
-  const stories = await Story.find({
-    project: projectId,
-    state: filter,
-  })
-    .populate({ path: 'requester', select: 'username' })
-    .populate({ path: 'owner', select: 'username' })
-    .exec();
-
-  res.json(stories);
-};
-
-const getCurrentStoriesByUser = async (req, res) => {
-  const { projectId, userId } = req.params;
-
-  const stories = await Story.find({
-    project: projectId,
-    owner: userId,
-  })
-    .populate({ path: 'requester', select: 'username' })
-    .populate({ path: 'owner', select: 'username' })
-    .exec();
-
-  res.json(stories);
-};
-
 const createStory = async (req, res) => {
-  // TODO: validations
-  // title -> required, no duplicates
-  // difficulty ->
-  // priority ->
+  // TODO: validations (title, description, state, diff, prio)
+
+  // FIXME: user can only create stories if member || owner
+
   const { projectId } = req.params;
   const user = req.user;
-  let state;
-
-  if (req.path === '/current') state = 'UNSTARTED';
-  if (req.path === '/backlog') state = 'UNSCHEDULED';
 
   const story = new Story({
     title: req.body.title,
     description: req.body.description,
-    state,
+    state: req.body.state,
+    owner: req.body.owner,
+    difficulty: req.body.difficulty,
+    priority: req.body.priority,
     requester: user._id,
     project: projectId,
   });
 
   const savedStory = await story.save();
 
-  res.status(201).json(savedStory);
+  const populatedStory = await Story.findById(savedStory._id)
+    .populate({ path: 'requester', select: 'username' })
+    .populate({ path: 'owner', select: 'username' })
+    .exec();
+
+  res.status(201).json(populatedStory);
 };
 
 const updateStory = async (req, res) => {
@@ -103,7 +86,12 @@ const updateStory = async (req, res) => {
   const user = req.user;
   const body = req.body;
 
-  const story = await Story.findById(storyId).exec();
+console.log(req.body);
+
+  const story = await Story.findOne({
+    project: projectId,
+    _id: storyId,
+  }).exec();
 
   if (!story) throw new AppError('Story not found', 404);
   if (!user.isProjectOwner(projectId) && !user.isProjectMember(projectId)) {
@@ -116,13 +104,36 @@ const updateStory = async (req, res) => {
 
   const updatedStory = await story.save();
 
-  res.json(updatedStory);
+  const populatedStory = await Story.findById(updatedStory._id)
+    .populate({ path: 'requester', select: 'username' })
+    .populate({ path: 'owner', select: 'username' })
+    .exec();
+
+  res.json(populatedStory);
+};
+
+const removeStory = async (req, res) => {
+  const { projectId, storyId } = req.params;
+  const user = req.user;
+
+  const story = await Story.findById(storyId).exec();
+
+  if (!story) throw new AppError('Story not found', 404);
+  if (!user.isProjectOwner(projectId) && !user.isProjectMember(projectId)) {
+    throw new AppError('Forbidden', 403);
+  }
+
+  await Story.deleteById(story._id);
+
+  res.status(204).end();
 };
 
 module.exports = {
-  getStoriesQuery,
-  getAllStories,
-  getCurrentStoriesByUser,
+  currentAlias,
+  backlogAlias,
+  archiveAlias,
+  getStories,
   createStory,
   updateStory,
+  removeStory,
 };

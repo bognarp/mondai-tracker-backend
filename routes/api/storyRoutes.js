@@ -4,22 +4,24 @@ const router = express.Router({ mergeParams: true });
 const storyController = require('../../controllers/storyController');
 
 // /:projectId/stories
-router.route('/').get(storyController.getStoriesQuery);
-router.route('/:storyId').patch(storyController.updateStory);
+
+router
+  .route('/')
+  .get(storyController.getStories)
+  .post(storyController.createStory);
+router
+  .route('/:storyId')
+  .patch(storyController.updateStory)
+  .delete(storyController.removeStory);
+
 router
   .route('/current')
-  .get(storyController.getAllStories)
-  .post(storyController.createStory);
+  .get(storyController.currentAlias, storyController.getStories);
 router
   .route('/backlog')
-  .get(storyController.getAllStories)
-  .post(storyController.createStory);
-router.route('/archive').get(storyController.getAllStories);
-router.route('/user/:userId').get(storyController.getCurrentStoriesByUser);
-
-// TODO:
-//    /stories/current .post().get().delete().patch()
-//    /stories/backlog .post().get().delete().patch()
-//    /stories/archive .get()
+  .get(storyController.backlogAlias, storyController.getStories);
+router
+  .route('/archive')
+  .get(storyController.archiveAlias, storyController.getStories);
 
 module.exports = router;

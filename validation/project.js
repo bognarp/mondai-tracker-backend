@@ -14,7 +14,7 @@ const checkProject = (data) => {
   }
 
   if (Validator.isEmpty(title)) {
-    errors.title = 'Title field is required';
+    errors.title = 'Title is required';
   }
 
   return {

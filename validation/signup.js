@@ -16,11 +16,11 @@ const checkSignup = (data) => {
   }
 
   if (Validator.isEmpty(username)) {
-    errors.username = 'Username field is required';
+    errors.username = 'Username is required';
   }
 
   if (Validator.isEmpty(email)) {
-    errors.email = 'Email field is required';
+    errors.email = 'Email is required';
   }
 
   if (!Validator.isEmail(email)) {
@@ -28,7 +28,7 @@ const checkSignup = (data) => {
   }
 
   if (Validator.isEmpty(password)) {
-    password = 'Password field is required';
+    password = 'Password is required';
   }
 
   if (!Validator.isLength(password, { min: 5, max: 30 })) {
@@ -36,7 +36,7 @@ const checkSignup = (data) => {
   }
 
   if (Validator.isEmpty(password2)) {
-    errors.password2 = 'Confirm Password field is required';
+    errors.password2 = 'Confirm Password is required';
   }
 
   if (!Validator.equals(password, password2)) {

@@ -41,7 +41,7 @@ const getStories = async (req, res) => {
     const sortBy = req.query.sort.split(',').join(' ');
     query = query.sort(sortBy);
   } else {
-    query = query.sort('-priority -difficulty');
+    query = query.sort('-priority difficulty');
   }
 
   const stories = await query

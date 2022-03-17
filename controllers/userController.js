@@ -28,8 +28,8 @@ const signupUser = async (req, res) => {
     password,
   });
 
-  const salt = bcrypt.genSalt(10);
-  const hashedPw = bcrypt.hash(newUser.password, salt);
+  const salt = await bcrypt.genSalt(10);
+  const hashedPw = await bcrypt.hash(newUser.password, salt);
 
   newUser.password = hashedPw;
 
@@ -51,7 +51,7 @@ const loginUser = async (req, res) => {
   if (match) {
     const payload = { id: user.id, username: user.username };
 
-    jwt.sign(payload, SECRET, { expiresIn: '1h' }, (err, encodedToken) => {
+    jwt.sign(payload, SECRET, { expiresIn: '2h' }, (err, encodedToken) => {
       res.json({ success: true, token: `${encodedToken}` });
     });
   } else {

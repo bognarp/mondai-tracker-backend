@@ -38,6 +38,7 @@ const createProject = async (req, res) => {
 
   const newProject = new Project({
     title: req.body.title,
+    description: req.body.description,
     owners: [user._id],
   });
 
@@ -57,6 +58,8 @@ const deleteProject = async (req, res) => {
   if (!user.isProjectOwner(project._id)) throw new AppError('Forbidden', 403);
 
   await Project.deleteById(project._id);
+
+  // TODO: stories clean-up after project delete
 
   user.ownProjects.pull(project._id);
   await user.save();

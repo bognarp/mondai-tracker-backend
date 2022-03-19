@@ -86,8 +86,6 @@ const updateStory = async (req, res) => {
   const user = req.user;
   const body = req.body;
 
-console.log(req.body);
-
   const story = await Story.findOne({
     project: projectId,
     _id: storyId,

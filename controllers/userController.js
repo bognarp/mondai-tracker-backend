@@ -49,7 +49,7 @@ const loginUser = async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
 
   if (match) {
-    const payload = { id: user.id, username: user.username };
+    const payload = { id: user.id, username: user.username, name: user.name };
 
     jwt.sign(payload, SECRET, { expiresIn: '2h' }, (err, encodedToken) => {
       res.json({ success: true, token: `${encodedToken}` });
@@ -73,10 +73,39 @@ const getUserById = async (req, res) => {
   res.json(user);
 };
 
+const updateUser = async (req, res) => {
+  const { userId } = req.params;
+  const body = req.body;
+
+  if (!req.user._id.equals(userId)) throw new AppError('Forbidden', 403);
+
+  if (body.username) {
+    const usernameExists = await User.findOne({ username: body.username });
+    if (usernameExists) throw new AppError('Username already exists', 400);
+  }
+  if (body.email) {
+    const emailExists = await User.findOne({ email: body.email });
+    if (emailExists) throw new AppError('Email Already in Use', 400);
+  }
+
+  const user = await User.findById(userId).exec();
+
+  if (!user) throw new AppError('User not found', 404);
+
+  Object.keys(body).forEach((prop) => {
+    user[prop] = body[prop];
+  });
+
+  const updatedUser = await user.save();
+
+  res.json(updatedUser);
+};
+
 module.exports = {
   getUsers,
   signupUser,
   loginUser,
   getCurrentUser,
   getUserById,
+  updateUser,
 };

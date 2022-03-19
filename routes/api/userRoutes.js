@@ -6,6 +6,7 @@ const userController = require('../../controllers/userController');
 const { validate } = require('../../utils/middleware');
 const checkLogin = require('../../validation/login');
 const checkSignup = require('../../validation/signup');
+const checkUserUpdate = require('../../validation/userUpdate');
 const projectRoutes = require('./projectRoutes');
 const protect = passport.authenticate('jwt', { session: false });
 
@@ -16,8 +17,12 @@ router.route('/signup').post(validate(checkSignup), userController.signupUser);
 router.route('/login').post(validate(checkLogin), userController.loginUser);
 
 // Protected routes
-router.route('/current').get(protect, userController.getCurrentUser);
-router.route('/:userId').get(protect, userController.getUserById);
-router.use('/:userId/projects', protect, projectRoutes);
+router.use(protect);
+router.route('/current').get(userController.getCurrentUser);
+router
+  .route('/:userId')
+  .get(userController.getUserById)
+  .patch(validate(checkUserUpdate), userController.updateUser);
+router.use('/:userId/projects', projectRoutes);
 
 module.exports = router;

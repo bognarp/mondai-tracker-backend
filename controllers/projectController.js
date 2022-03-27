@@ -19,8 +19,8 @@ const getProject = async (req, res) => {
   const user = req.user;
 
   const project = await Project.findById(req.params.projectId)
-    .populate({ path: 'owners', select: 'username' })
-    .populate({ path: 'members', select: 'username' })
+    .populate({ path: 'owners', select: 'name username email' })
+    .populate({ path: 'members', select: 'name username email' })
     .exec();
 
   if (!project) throw new AppError('Project not found', 404);
@@ -33,7 +33,7 @@ const getProject = async (req, res) => {
 };
 
 const createProject = async (req, res) => {
-  // TODO: validations
+  // TODO: validations like User
   const user = req.user;
 
   const newProject = new Project({
@@ -57,9 +57,7 @@ const deleteProject = async (req, res) => {
   if (!project) throw new AppError('Project not found', 404);
   if (!user.isProjectOwner(project._id)) throw new AppError('Forbidden', 403);
 
-  await Project.deleteById(project._id);
-
-  // TODO: stories clean-up after project delete
+  await project.deleteOne();
 
   user.ownProjects.pull(project._id);
   await user.save();

@@ -50,6 +50,30 @@ const createProject = async (req, res) => {
   res.json(savedProject);
 };
 
+const updateProject = async (req, res) => {
+  const { projectId } = req.params;
+  const user = req.user;
+  const body = req.body;
+
+  const project = await Project.findById(projectId).exec();
+
+  if (!project) throw new AppError('Project not found', 404);
+  if (!user.isProjectOwner(projectId)) throw new AppError('Forbidden', 403);
+
+  Object.keys(body).forEach((key) => {
+    project[key] = body[key];
+  });
+
+  const updatedProject = await project.save();
+
+  const populatedProject = await Project.findById(updatedProject._id)
+    .populate({ path: 'owners', select: 'name username email' })
+    .populate({ path: 'members', select: 'name username email' })
+    .exec();
+
+  res.json(populatedProject);
+};
+
 const deleteProject = async (req, res) => {
   const user = req.user;
 
@@ -70,4 +94,5 @@ module.exports = {
   getProject,
   createProject,
   deleteProject,
+  updateProject,
 };

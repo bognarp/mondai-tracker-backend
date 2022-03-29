@@ -18,6 +18,7 @@ router.route('/').post(validate(checkProject), projectController.createProject);
 router
   .route('/:projectId')
   .get(projectController.getProject)
+  .patch(projectController.updateProject)
   .delete(projectController.deleteProject);
 router.use('/:projectId/stories', storyRoutes);
 

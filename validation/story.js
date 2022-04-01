@@ -4,14 +4,10 @@ const Validator = require('validator');
 const checkStory = (data) => {
   let errors = {};
 
-  let { title, description, state, owner, difficulty, priority } = data;
+  let { title, description } = data;
 
   title = validText(title) ? title : '';
   description = validText(description) ? description : '';
-  state = validText(state) ? state : '';
-  owner = validText(owner) ? owner : '';
-  difficulty = validText(difficulty) ? difficulty : '';
-  priority = validText(priority) ? priority : '';
 
   if (!Validator.isLength(title, { min: 4, max: 30 })) {
     errors.title = 'Title must be between 4 and 30 characters long';

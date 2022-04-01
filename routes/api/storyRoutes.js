@@ -2,13 +2,15 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 
 const storyController = require('../../controllers/storyController');
+const { validate } = require('../../utils/middleware');
+const checkStory = require('../../validation/story');
 
 // /:projectId/stories
 
 router
   .route('/')
   .get(storyController.getStories)
-  .post(storyController.createStory);
+  .post(validate(checkStory), storyController.createStory);
 router
   .route('/:storyId')
   .patch(storyController.updateStory)

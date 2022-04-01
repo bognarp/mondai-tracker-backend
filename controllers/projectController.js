@@ -33,12 +33,12 @@ const getProject = async (req, res) => {
 };
 
 const createProject = async (req, res) => {
-  // TODO: validations like User
   const user = req.user;
 
   const newProject = new Project({
     title: req.body.title,
     description: req.body.description,
+    avatar: req.body.avatar,
     owners: [user._id],
   });
 

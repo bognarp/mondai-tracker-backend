@@ -4,17 +4,17 @@ const userSchema = new Schema(
   {
     username: {
       type: String,
-      required: true,
+      required: [true, 'Username is required'],
       unique: true,
     },
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email is required'],
       unique: true,
     },
     password: {
       type: String,
-      required: true,
+      required: [true, 'Password is required'],
     },
     name: String,
     ownProjects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],

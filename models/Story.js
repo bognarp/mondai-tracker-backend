@@ -4,8 +4,8 @@ const storySchema = new Schema(
   {
     title: {
       type: String,
-      required: true,
-      // TODO: must be between 5 - 30 chars
+      required: [true, 'Title is required'],
+      trim: true,
     },
     description: String,
     state: {

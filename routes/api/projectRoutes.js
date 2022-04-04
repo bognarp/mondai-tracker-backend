@@ -20,6 +20,10 @@ router
   .get(projectController.getProject)
   .patch(projectController.updateProject)
   .delete(projectController.deleteProject);
+router
+  .route('/:projectId/members/:userId')
+  .post(projectController.addInvitedMember);
+// .delete(projectController.removeMember);
 router.use('/:projectId/stories', storyRoutes);
 
 module.exports = router;

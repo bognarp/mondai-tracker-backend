@@ -23,6 +23,12 @@ router
   .route('/:userId')
   .get(userController.getUserById)
   .patch(validate(checkUserUpdate), userController.updateUser);
+
+router.route('/:userId/invites').post(userController.sendInvite);
+// router
+//   .route('/:userId/invites/:inviteId')
+//   .delete(userController.removeUserInvite);
+
 router.use('/:userId/projects', projectRoutes);
 
 module.exports = router;

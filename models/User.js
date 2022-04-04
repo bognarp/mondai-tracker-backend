@@ -1,5 +1,10 @@
 const { Schema, model } = require('mongoose');
 
+const inviteSchema = new Schema({
+  project: { type: Schema.Types.ObjectId, required: true },
+  sender: { type: Schema.Types.ObjectId, required: true },
+});
+
 const userSchema = new Schema(
   {
     username: {
@@ -19,6 +24,7 @@ const userSchema = new Schema(
     name: String,
     ownProjects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
     memberProjects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+    invites: [inviteSchema],
   },
   { timestamps: true }
 );

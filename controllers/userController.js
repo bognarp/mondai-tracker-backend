@@ -83,6 +83,7 @@ const updateUser = async (req, res) => {
     const usernameExists = await User.findOne({ username: body.username });
     if (usernameExists) throw new AppError('Username already exists', 400);
   }
+
   if (body.email) {
     const emailExists = await User.findOne({ email: body.email });
     if (emailExists) throw new AppError('Email Already in Use', 400);
@@ -101,6 +102,38 @@ const updateUser = async (req, res) => {
   res.json(updatedUser);
 };
 
+const sendInvite = async (req, res) => {
+  const { userId } = req.params;
+  const sender = req.user;
+  const { project } = req.body;
+
+  if (sender._id.equals(userId)) {
+    throw new AppError('You cannot invite yourself', 400);
+  }
+
+  if (!sender.isProjectOwner(project)) {
+    throw new AppError('Forbidden', 403);
+  }
+
+  const user = await User.findById(userId).exec();
+
+  if (!user) throw new AppError('User not found', 404);
+
+  if (user.isProjectOwner(project) || user.isProjectMember(project)) {
+    throw new AppError('User is already a member of the project', 400);
+  }
+
+  if (user.invites.some((invite) => invite.project.equals(project))) {
+    throw new AppError('An invite has already been sent to this user', 400);
+  }
+
+  user.invites.push({ project, sender });
+
+  const invitedUser = await user.save();
+
+  res.json(invitedUser);
+};
+
 module.exports = {
   getUsers,
   signupUser,
@@ -108,4 +141,5 @@ module.exports = {
   getCurrentUser,
   getUserById,
   updateUser,
+  sendInvite,
 };

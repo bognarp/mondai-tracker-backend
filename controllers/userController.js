@@ -5,7 +5,18 @@ const AppError = require('../utils/appError');
 const { SECRET } = require('../utils/config');
 
 const getUsers = async (req, res) => {
-  const users = await User.find({}).exec();
+  const queryObj = { ...req.query };
+
+  let usersQuery = User.find({});
+
+  if (queryObj.q) {
+    usersQuery = User.find({
+      $or: [{ username: queryObj.q }, { email: queryObj.q }],
+    });
+  }
+
+  const users = await usersQuery.exec();
+
   res.json(users);
 };
 

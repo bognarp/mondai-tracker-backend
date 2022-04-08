@@ -9,6 +9,7 @@ const getUsers = async (req, res) => {
 
   let usersQuery = User.find({});
 
+  // Filtering by username || email
   if (queryObj.q) {
     usersQuery = User.find({
       $or: [{ username: queryObj.q }, { email: queryObj.q }],
@@ -80,7 +81,21 @@ const getCurrentUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  const user = await User.findById(req.params.userId).exec();
+  const queryObj = { ...req.query };
+
+  let userQuery = User.findById(req.params.userId);
+
+  // Field limiting
+  if (queryObj.fields) {
+    const fields = queryObj.fields.split(',').join(' ');
+    userQuery = userQuery.select(fields);
+  }
+
+  const user = await userQuery
+    .populate('invites.project', { title: 1 })
+    .populate('invites.sender', { username: 1 })
+    .exec();
+
   res.json(user);
 };
 
@@ -114,8 +129,8 @@ const updateUser = async (req, res) => {
 };
 
 const sendInvite = async (req, res) => {
-  const { userId } = req.params;
   const sender = req.user;
+  const { userId } = req.params;
   const { project } = req.body;
 
   if (sender._id.equals(userId)) {

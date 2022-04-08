@@ -9,8 +9,8 @@ const checkStory = (data) => {
   title = validText(title) ? title : '';
   description = validText(description) ? description : '';
 
-  if (!Validator.isLength(title, { min: 4, max: 30 })) {
-    errors.title = 'Title must be between 4 and 30 characters long';
+  if (!Validator.isLength(title, { min: 4, max: 60 })) {
+    errors.title = 'Title must be between 4 and 60 characters long';
   }
 
   if (Validator.isEmpty(title)) {

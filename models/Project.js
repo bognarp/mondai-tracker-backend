@@ -26,6 +26,7 @@ projectSchema.post(
   { document: true, query: false },
   async function () {
     await Story.deleteMany({ project: this._id });
+    // TODO: Cleanup invites? 
   }
 );
 

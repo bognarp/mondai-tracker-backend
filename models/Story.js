@@ -6,7 +6,7 @@ const storySchema = new Schema(
       type: String,
       required: [true, 'Title is required'],
       minLength: [4, 'Title is too short (must be more than 4 characters)'],
-      maxLength: [30, 'Title is too long (must be less than 30 characters)'],
+      maxLength: [60, 'Title is too long (must be less than 60 characters)'],
       trim: true,
     },
     description: String,

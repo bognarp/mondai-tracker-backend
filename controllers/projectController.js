@@ -96,7 +96,7 @@ const deleteProject = async (req, res) => {
   res.status(204).end();
 };
 
-const addInvitedMember = async (req, res) => {
+const acceptInvite = async (req, res) => {
   const user = req.user;
   const { projectId, userId } = req.params;
 
@@ -130,5 +130,5 @@ module.exports = {
   createProject,
   deleteProject,
   updateProject,
-  addInvitedMember,
+  acceptInvite,
 };

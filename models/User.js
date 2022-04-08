@@ -1,8 +1,8 @@
 const { Schema, model } = require('mongoose');
 
 const inviteSchema = new Schema({
-  project: { type: Schema.Types.ObjectId, required: true },
-  sender: { type: Schema.Types.ObjectId, required: true },
+  project: { type: Schema.Types.ObjectId, required: true, ref: 'Project' },
+  sender: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
 });
 
 const userSchema = new Schema(

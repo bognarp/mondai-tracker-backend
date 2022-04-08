@@ -22,7 +22,7 @@ router
   .delete(projectController.deleteProject);
 router
   .route('/:projectId/members/:userId')
-  .post(projectController.addInvitedMember);
+  .post(projectController.acceptInvite);
 // .delete(projectController.removeMember);
 router.use('/:projectId/stories', storyRoutes);
 

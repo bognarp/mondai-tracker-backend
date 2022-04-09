@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -160,6 +161,25 @@ const sendInvite = async (req, res) => {
   res.json(invitedUser);
 };
 
+const removeUserInvite = async (req, res) => {
+  const user = req.user;
+  const { userId, inviteId } = req.params;
+
+  if (!user._id.equals(userId)) {
+    throw new AppError('Forbidden', 403);
+  }
+
+  const invite = user.invites.id(inviteId);
+
+  if (!invite) throw new AppError('Invite not found', 404);
+
+  invite.remove();
+
+  await user.save();
+
+  res.status(204).end();
+};
+
 module.exports = {
   getUsers,
   signupUser,
@@ -168,4 +188,5 @@ module.exports = {
   getUserById,
   updateUser,
   sendInvite,
+  removeUserInvite,
 };

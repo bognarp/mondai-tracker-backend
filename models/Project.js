@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 const Story = require('./Story');
+const User = require('./User');
 
 const projectSchema = new Schema(
   {
@@ -7,7 +8,7 @@ const projectSchema = new Schema(
       type: String,
       required: [true, 'Title is required'],
       minLength: [4, 'Title is too short (must be more than 4 characters)'],
-      maxLength: [30, 'Title is too long (must be less than 30 characters)'],
+      maxLength: [60, 'Title is too long (must be less than 60 characters)'],
       trim: true,
     },
     description: String,
@@ -26,7 +27,10 @@ projectSchema.post(
   { document: true, query: false },
   async function () {
     await Story.deleteMany({ project: this._id });
-    // TODO: Cleanup invites? 
+    
+    this.members.forEach((member) => {
+      User.removeMemberProjectFromUser(member, this._id);
+    });
   }
 );
 

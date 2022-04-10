@@ -22,8 +22,8 @@ router
   .delete(projectController.deleteProject);
 router
   .route('/:projectId/members/:userId')
-  .post(projectController.acceptInvite);
-// .delete(projectController.removeMember);
+  .post(projectController.acceptInvite)
+  .delete(projectController.removeMember);
 router.use('/:projectId/stories', storyRoutes);
 
 module.exports = router;

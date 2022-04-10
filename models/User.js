@@ -44,6 +44,19 @@ userSchema.methods.isProjectMember = function (projectId) {
   return this.memberProjects.some((pId) => pId.equals(projectId));
 };
 
+userSchema.statics.removeMemberProjectFromUser = async function (
+  userId,
+  projectId
+) {
+  const user = await this.findById(userId).exec();
+
+  user.memberProjects = user.memberProjects.filter(
+    (project) => !project.equals(projectId)
+  );
+
+  await user.save();
+};
+
 const User = model('User', userSchema);
 
 module.exports = User;

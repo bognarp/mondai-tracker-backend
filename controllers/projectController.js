@@ -124,6 +124,32 @@ const acceptInvite = async (req, res) => {
   res.status(204).end();
 };
 
+const removeMember = async (req, res) => {
+  const user = req.user;
+  const { projectId, userId } = req.params;
+
+  const project = await Project.findById(projectId);
+
+  if (!project) throw new AppError('Project not found', 404);
+  if (!user.isProjectOwner(project._id) && !user.equals(userId)) {
+    throw new AppError('Forbidden', 403);
+  }
+
+  const projectMember = await User.findById(userId).exec();
+
+  if (!projectMember) throw new AppError('User not found', 404);
+
+  projectMember.memberProjects = projectMember.memberProjects.filter(
+    (project) => !project.equals(projectId)
+  );
+  project.members = project.members.filter((member) => !member.equals(userId));
+
+  await projectMember.save();
+  await project.save();
+
+  res.status(204).end();
+};
+
 module.exports = {
   getAllProjects,
   getProject,
@@ -131,4 +157,5 @@ module.exports = {
   deleteProject,
   updateProject,
   acceptInvite,
+  removeMember,
 };

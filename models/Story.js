@@ -13,16 +13,16 @@ const storySchema = new Schema(
     state: {
       type: String,
       enum: [
-        'UNSCHEDULED',
-        'UNSTARTED',
-        'STARTED',
-        'RESTARTED',
-        'FINISHED',
-        'REJECTED',
-        'ACCEPTED',
+        'Unscheduled',
+        'Unstarted',
+        'Started',
+        'Restarted',
+        'Finished',
+        'Rejected',
+        'Accepted',
       ],
       required: true,
-      default: 'UNSCHEDULED',
+      default: 'Unscheduled',
     },
     difficulty: {
       type: Number,
@@ -65,16 +65,16 @@ storySchema.set('toJSON', {
 
 storySchema.virtual('stateCategory').get(function () {
   switch (this.state) {
-    case 'UNSTARTED':
-    case 'STARTED':
-    case 'REJECTED':
-    case 'FINISHED':
-    case 'RESTARTED':
-      return 'CURRENT';
-    case 'UNSCHEDULED':
-      return 'BACKLOG';
-    case 'ACCEPTED':
-      return 'DONE';
+    case 'Unstarted':
+    case 'Started':
+    case 'Rejected':
+    case 'Finished':
+    case 'Restarted':
+      return 'Current';
+    case 'Unscheduled':
+      return 'Backlog';
+    case 'Accepted':
+      return 'Done';
     default:
       return null;
   }

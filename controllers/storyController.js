@@ -3,17 +3,17 @@ const AppError = require('../utils/appError');
 
 // ALIAS MIDDLEWARE
 const currentAlias = (req, res, next) => {
-  req.query.state = 'UNSTARTED,STARTED,RESTARTED,FINISHED,REJECTED';
+  req.query.state = 'Unstarted,Started,Restarted,Finished,Rejected';
   next();
 };
 
 const backlogAlias = (req, res, next) => {
-  req.query.state = 'UNSCHEDULED';
+  req.query.state = 'Unscheduled';
   next();
 };
 
 const archiveAlias = (req, res, next) => {
-  req.query.state = 'ACCEPTED';
+  req.query.state = 'Accepted';
   next();
 };
 

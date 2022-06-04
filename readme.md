@@ -1,38 +1,45 @@
 ## Backend Routes
 
-:lock: means the endpoint is protected & needs auth token
+API can be accessed @ https://mondai-backend.herokuapp.com/api/
+
+:lock: - means the endpoint is protected & needs an auth token
 
 ### `users`
 
-- `GET /api/users` - returns all users
-- :lock: `GET /api/users/:userId` - returns user by id
-- :lock: `GET /api/users/current`- returns authenticated user 
-- `POST /api/users/login` - log in, returns a token
-- `POST /api/users/signup` - sign up
+**Authentication**
 
-  **Querying users**
+- `POST /users/signup` - sign up
+  - Body: `{ username, email, password }`
+- `POST /users/login` - log in, returns a signed token with 2 hour of expiration
+  - Body: `{ email, password }`
 
-- `GET /api/users`
-  - `q=` - String (find by username or email)
+**Querying users**
+
+- :lock: `GET /users` - returns all users
+- :lock: `GET /users/:userId` - returns user by id
+- :lock: `GET /users/current`- returns authenticated user
+
+- :lock: `GET /users`
+  - `q=` - `String` (query by username or email)
 
 ### `projects` :lock:
 
-- `GET /api/projects` - returns all project
-- `POST /api/projects` - creates project
-- `GET /api/projects/:projectId` - returns project by id
-- `DELETE /api/projects/:projectId` - remove project by id
+- `GET /projects` - returns all project
+- `POST /projects` - creates project
+- `GET /projects/:projectId` - returns project by id
+- `DELETE /projects/:projectId` - remove project by id
 
 ### `stories` :lock:
 
-- `GET /api/projects/:projectId/stories/current` - returns stories in current sprint
-- `GET /api/projects/:projectId/stories/backlog` - returns stories in backlog
-- `GET /api/projects/:projectId/stories/backlog` - returns archived stories
-- `PATCH /api/projects/:projectId/stories/:storyId` - edit story by id
-- `DELETE /api/projects/:projectId/stories/:storyId` - remove story by id
+- `GET /projects/:projectId/stories/current` - returns stories in current sprint
+- `GET /projects/:projectId/stories/backlog` - returns stories in backlog
+- `GET /projects/:projectId/stories/backlog` - returns archived stories
+- `PATCH /projects/:projectId/stories/:storyId` - edit story by id
+- `DELETE /projects/:projectId/stories/:storyId` - remove story by id
 
-  **Querying stories**
+**Querying stories**
 
-- `GET /api/projects/:projectId/stories?`
+- `GET /projects/:projectId/stories?`
   - `title=` - `String`
   - `description=` - `String`
   - `state=` - `UNSCHEDULED`,`UNSTARTED`,`STARTED`,`RESTARTED`,`FINISHED`,`REJECTED`,`ACCEPTED`

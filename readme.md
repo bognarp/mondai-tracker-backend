@@ -24,7 +24,7 @@ API can be accessed @ https://mondai-backend.herokuapp.com/api/
 
 ### `projects` :lock:
 
-- `GET /projects` - returns all project
+- `GET /projects` - returns all projects
 - `POST /projects` - creates project
 - `GET /projects/:projectId` - returns project by id
 - `DELETE /projects/:projectId` - remove project by id
@@ -33,7 +33,7 @@ API can be accessed @ https://mondai-backend.herokuapp.com/api/
 
 - `GET /projects/:projectId/stories/current` - returns stories in current sprint
 - `GET /projects/:projectId/stories/backlog` - returns stories in backlog
-- `GET /projects/:projectId/stories/backlog` - returns archived stories
+- `GET /projects/:projectId/stories/archive` - returns archived stories
 - `PATCH /projects/:projectId/stories/:storyId` - edit story by id
 - `DELETE /projects/:projectId/stories/:storyId` - remove story by id
 
